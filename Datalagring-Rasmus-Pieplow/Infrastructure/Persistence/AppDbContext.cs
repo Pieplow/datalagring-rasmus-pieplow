@@ -12,6 +12,11 @@ public class AppDbContext : DbContext
 {
     public DbSet<Project> Projects { get; set; }
     public DbSet<TaskItem> Tasks { get; set; }
+    public DbSet<Instructor> Instructors { get; set; }
+    public DbSet<CourseInstance> CourseInstances { get; set; }
+    public DbSet<Participant> Participants { get; set; }
+    public DbSet<Registration> Registrations { get; set; }
+
 
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)

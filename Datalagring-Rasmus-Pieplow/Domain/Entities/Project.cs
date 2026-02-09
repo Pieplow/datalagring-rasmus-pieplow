@@ -9,8 +9,6 @@ namespace Datalagring_Rasmus_Pieplow.Domain.Entities
         public Guid Id { get; set; }
         public string Name { get; set; }
 
-
-
         public ICollection<TaskItem> Tasks { get; set; } 
 
     }
