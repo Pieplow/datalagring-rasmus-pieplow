@@ -2,6 +2,6 @@
 
     public record CreateTaskDto(
         string Title, 
-        Guid ProjectId
+        Guid CourseId
         );
    

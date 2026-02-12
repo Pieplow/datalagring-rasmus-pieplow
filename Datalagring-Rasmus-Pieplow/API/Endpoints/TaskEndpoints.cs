@@ -9,29 +9,29 @@ namespace Datalagring_Rasmus_Pieplow.API.Endpoints
     {
         public static void MapTaskEndpoints(this WebApplication app)
         {
-            // GET: Tasks for a specific project
-            app.MapGet("/projects/{projectId:guid}/tasks",
-                async (Guid projectId, AppDbContext db) =>
+            // GET: Tasks for a specific Course
+            app.MapGet("/Courses/{CourseId:guid}/tasks",
+                async (Guid CourseId, AppDbContext db) =>
                 {
                     return await db.Tasks
-                        .Where(t => t.ProjectId == projectId)
+                        .Where(t => t.CourseId == CourseId)
                         .ToListAsync();
                 });
 
-            // POST: Create task for a project
+            // POST: Create task for a Course
             app.MapPost("/tasks", async (CreateTaskDto dto, AppDbContext db) =>
             {
-                var projectExists = await db.Projects.AnyAsync(p => p.Id == dto.ProjectId);
+                var CourseExists = await db.Courses.AnyAsync(p => p.Id == dto.CourseId);
 
-                if (!projectExists)
-                    return Results.BadRequest("Project does not exist");
+                if (!CourseExists)
+                    return Results.BadRequest("Course does not exist");
 
                 var task = new TaskItem
                 {
                     Id = Guid.NewGuid(),
                     Title = dto.Title,
                     IsCompleted = false,
-                    ProjectId = dto.ProjectId
+                    CourseId = dto.CourseId
                 };
 
                 db.Tasks.Add(task);

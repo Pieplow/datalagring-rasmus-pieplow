@@ -10,7 +10,7 @@ namespace Datalagring_Rasmus_Pieplow.Infrastructure.Persistence;
 
 public class AppDbContext : DbContext
 {
-    public DbSet<Project> Projects { get; set; }
+    public DbSet<Course> Courses { get; set; }
     public DbSet<TaskItem> Tasks { get; set; }
     public DbSet<Instructor> Instructors { get; set; }
     public DbSet<CourseInstance> CourseInstances { get; set; }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Datalagring_Rasmus_Pieplow.Domain.Entities
 {
-    public class Project
+    public class Course
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

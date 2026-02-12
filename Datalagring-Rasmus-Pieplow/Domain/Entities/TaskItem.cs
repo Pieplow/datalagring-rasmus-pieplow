@@ -12,9 +12,9 @@ namespace Datalagring_Rasmus_Pieplow.Domain.Entities
 
             public bool IsCompleted { get; set; }
 
-            public Guid ProjectId { get; set; }
+            public Guid CourseId { get; set; }
 
-            public Project? Project { get; set; }
+            public Course? Course { get; set; }
 
 
 
