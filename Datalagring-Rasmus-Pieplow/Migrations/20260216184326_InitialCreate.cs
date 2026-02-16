@@ -6,11 +6,23 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Datalagring_Rasmus_Pieplow.Migrations
 {
     /// <inheritdoc />
-    public partial class AddEducationEntities : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Courses",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Courses", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Instructors",
                 columns: table => new
@@ -44,7 +56,7 @@ namespace Datalagring_Rasmus_Pieplow.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     InstructorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Capacity = table.Column<int>(type: "int", nullable: false)
                 },
@@ -52,15 +64,15 @@ namespace Datalagring_Rasmus_Pieplow.Migrations
                 {
                     table.PrimaryKey("PK_CourseInstances", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CourseInstances_Instructors_InstructorId",
-                        column: x => x.InstructorId,
-                        principalTable: "Instructors",
+                        name: "FK_CourseInstances_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CourseInstances_Projects_ProjectId",
-                        column: x => x.ProjectId,
-                        principalTable: "Projects",
+                        name: "FK_CourseInstances_Instructors_InstructorId",
+                        column: x => x.InstructorId,
+                        principalTable: "Instructors",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -92,14 +104,14 @@ namespace Datalagring_Rasmus_Pieplow.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_CourseInstances_CourseId",
+                table: "CourseInstances",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CourseInstances_InstructorId",
                 table: "CourseInstances",
                 column: "InstructorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CourseInstances_ProjectId",
-                table: "CourseInstances",
-                column: "ProjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Registrations_CourseInstanceId",
@@ -123,6 +135,9 @@ namespace Datalagring_Rasmus_Pieplow.Migrations
 
             migrationBuilder.DropTable(
                 name: "Participants");
+
+            migrationBuilder.DropTable(
+                name: "Courses");
 
             migrationBuilder.DropTable(
                 name: "Instructors");

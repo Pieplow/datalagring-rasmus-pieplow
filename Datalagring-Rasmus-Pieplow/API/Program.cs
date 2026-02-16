@@ -13,7 +13,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 var app = builder.Build();
 
 app.MapGet("/", () => "API is running");
-app.MapProjectEndpoints();
+app.MapCourseInstanceEndpoints();
+app.MapParticipantEndpoints();
+app.MapInstructorEndpoints();
+app.MapRegistrationEndpoints();
+app.MapCourseEndpoints();
+app.MapRegistrationEndpoints();
 
 app.Run();
 

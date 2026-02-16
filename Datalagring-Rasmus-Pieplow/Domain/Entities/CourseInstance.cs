@@ -5,8 +5,8 @@
         public Guid Id { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public Guid ProjectId { get; set; }
-        public Project? Project { get; set; }
+        public Guid CourseId { get; set; }
+        public Course? Course { get; set; }
         public Guid InstructorId { get; set; }
         public Instructor? Instructor { get; set; }
 

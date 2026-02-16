@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Datalagring_Rasmus_Pieplow.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260209200009_AddEducationEntities")]
-    partial class AddEducationEntities
+    [Migration("20260216184326_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,6 +25,21 @@ namespace Datalagring_Rasmus_Pieplow.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Datalagring_Rasmus_Pieplow.Domain.Entities.Course", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Courses");
+                });
+
             modelBuilder.Entity("Datalagring_Rasmus_Pieplow.Domain.Entities.CourseInstance", b =>
                 {
                     b.Property<Guid>("Id")
@@ -34,13 +49,13 @@ namespace Datalagring_Rasmus_Pieplow.Migrations
                     b.Property<int>("Capacity")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("InstructorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ProjectId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("StartDate")
@@ -48,9 +63,9 @@ namespace Datalagring_Rasmus_Pieplow.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InstructorId");
+                    b.HasIndex("CourseId");
 
-                    b.HasIndex("ProjectId");
+                    b.HasIndex("InstructorId");
 
                     b.ToTable("CourseInstances");
                 });
@@ -93,21 +108,6 @@ namespace Datalagring_Rasmus_Pieplow.Migrations
                     b.ToTable("Participants");
                 });
 
-            modelBuilder.Entity("Datalagring_Rasmus_Pieplow.Domain.Entities.Project", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Projects");
-                });
-
             modelBuilder.Entity("Datalagring_Rasmus_Pieplow.Domain.Entities.Registration", b =>
                 {
                     b.Property<Guid>("Id")
@@ -132,46 +132,23 @@ namespace Datalagring_Rasmus_Pieplow.Migrations
                     b.ToTable("Registrations");
                 });
 
-            modelBuilder.Entity("Datalagring_Rasmus_Pieplow.Domain.Entities.TaskItem", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("ProjectId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("Tasks");
-                });
-
             modelBuilder.Entity("Datalagring_Rasmus_Pieplow.Domain.Entities.CourseInstance", b =>
                 {
+                    b.HasOne("Datalagring_Rasmus_Pieplow.Domain.Entities.Course", "Course")
+                        .WithMany("CourseInstances")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Datalagring_Rasmus_Pieplow.Domain.Entities.Instructor", "Instructor")
                         .WithMany()
                         .HasForeignKey("InstructorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Datalagring_Rasmus_Pieplow.Domain.Entities.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Course");
 
                     b.Navigation("Instructor");
-
-                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("Datalagring_Rasmus_Pieplow.Domain.Entities.Registration", b =>
@@ -193,15 +170,9 @@ namespace Datalagring_Rasmus_Pieplow.Migrations
                     b.Navigation("Participant");
                 });
 
-            modelBuilder.Entity("Datalagring_Rasmus_Pieplow.Domain.Entities.TaskItem", b =>
+            modelBuilder.Entity("Datalagring_Rasmus_Pieplow.Domain.Entities.Course", b =>
                 {
-                    b.HasOne("Datalagring_Rasmus_Pieplow.Domain.Entities.Project", "Project")
-                        .WithMany("Tasks")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Project");
+                    b.Navigation("CourseInstances");
                 });
 
             modelBuilder.Entity("Datalagring_Rasmus_Pieplow.Domain.Entities.CourseInstance", b =>
@@ -212,11 +183,6 @@ namespace Datalagring_Rasmus_Pieplow.Migrations
             modelBuilder.Entity("Datalagring_Rasmus_Pieplow.Domain.Entities.Participant", b =>
                 {
                     b.Navigation("Registrations");
-                });
-
-            modelBuilder.Entity("Datalagring_Rasmus_Pieplow.Domain.Entities.Project", b =>
-                {
-                    b.Navigation("Tasks");
                 });
 #pragma warning restore 612, 618
         }
