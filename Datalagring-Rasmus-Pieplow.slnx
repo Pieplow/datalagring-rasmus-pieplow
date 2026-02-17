@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="Datalagring-Rasmus-Pieplow/Datalagring-Rasmus-Pieplow.csproj" />
+  <Project Path="Datalagring.WPF/Datalagring.WPF.csproj" Id="3386f8d7-0b03-40c3-86a5-29e9a85b8973" />
 </Solution>

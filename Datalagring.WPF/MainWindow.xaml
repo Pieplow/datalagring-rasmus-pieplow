@@ -1,12 +1,38 @@
 ﻿<Window x:Class="Datalagring.WPF.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Datalagring.WPF"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Kursadministration" Height="700" Width="800">
+    <ScrollViewer>
+        <StackPanel Margin="20">
+            <TextBlock Text="Student- och Kursadministration" FontSize="26" FontWeight="Bold" Margin="0,0,0,20"/>
 
-    </Grid>
+            <GroupBox Header="Steg 1: Skapa ny Student" Margin="0,0,0,20" Padding="10">
+                <StackPanel>
+                    <Label Content="Förnamn:"/>
+                    <TextBox x:Name="txtFirstName" Margin="0,0,0,10"/>
+                    <Label Content="Efternamn:"/>
+                    <TextBox x:Name="txtLastName" Margin="0,0,0,10"/>
+                    <Label Content="E-post:"/>
+                    <TextBox x:Name="txtEmail" Margin="0,0,0,10"/>
+                    <Button Content="Spara Student" Click="btnSaveStudent_Click" Background="LightGreen" Height="30"/>
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox Header="Steg 2: Registrera Student på Kurs" Padding="10">
+                <StackPanel>
+                    <Label Content="Välj Student:"/>
+                    <ComboBox x:Name="cbParticipants" DisplayMemberPath="FirstName" Margin="0,0,0,10"/>
+
+                    <Label Content="Välj Kursinstans (ID):"/>
+                    <ComboBox x:Name="cbCourseInstances" DisplayMemberPath="Id" Margin="0,0,0,15"/>
+
+                    <Button Content="Genomför Kursregistrering" Click="btnRegister_Click" 
+                            Background="#007ACC" Foreground="White" FontWeight="Bold" Height="35"/>
+                </StackPanel>
+            </GroupBox>
+
+            <TextBlock Text="Aktuella Kursregistreringar:" FontWeight="Bold" Margin="0,20,0,5"/>
+            <DataGrid x:Name="dgRegistrations" Height="150" AutoGenerateColumns="True"/>
+        </StackPanel>
+    </ScrollViewer>
 </Window>
