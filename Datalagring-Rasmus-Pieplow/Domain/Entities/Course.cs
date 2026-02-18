@@ -7,9 +7,9 @@ namespace Datalagring_Rasmus_Pieplow.Domain.Entities
     public class Course
     {
         public Guid Id { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
 
-        public ICollection<CourseInstance> CourseInstances { get; set; } = new List<CourseInstance>();
+        public ICollection<CourseInstance> CourseInstances { get; set; } = [];
 
     }
 }

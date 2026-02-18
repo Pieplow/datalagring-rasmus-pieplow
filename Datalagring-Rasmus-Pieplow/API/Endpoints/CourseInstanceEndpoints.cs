@@ -88,17 +88,24 @@ public static class CourseInstanceEndpoints
                 return Results.NoContent();
             });
 
-        // DELETE: ta bort kurstillfälle
-        app.MapDelete("/courseinstances/{id:guid}",
-            async (Guid id, AppDbContext db) =>
+        app.MapDelete("/instructors/{id:guid}", async (Guid id, AppDbContext db) =>
+        {
+            var instructor = await db.Instructors.FindAsync(id);
+            if (instructor is null) return Results.NotFound();
+
+            // Kolla om instruktören har några kurstillfällen för att undvika potentiel krasch
+            var isAssigned = await db.CourseInstances.AnyAsync(ci => ci.InstructorId == id);
+
+            if (isAssigned)
             {
-                var instance = await db.CourseInstances.FindAsync(id);
-                if (instance is null) return Results.NotFound();
+                return Results.Conflict("Kan inte ta bort instruktören eftersom hen är kopplad till ett eller flera kurstillfällen.");
+            }
 
-                db.CourseInstances.Remove(instance);
-                await db.SaveChangesAsync();
+            db.Instructors.Remove(instructor);
+            await db.SaveChangesAsync();
 
-                return Results.NoContent();
-            });
+            return Results.NoContent();
+        });
     }
 }
+

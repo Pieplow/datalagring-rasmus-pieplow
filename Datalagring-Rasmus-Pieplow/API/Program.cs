@@ -16,7 +16,6 @@ app.MapGet("/", () => "API is running");
 app.MapCourseInstanceEndpoints();
 app.MapParticipantEndpoints();
 app.MapInstructorEndpoints();
-app.MapRegistrationEndpoints();
 app.MapCourseEndpoints();
 app.MapRegistrationEndpoints();
 

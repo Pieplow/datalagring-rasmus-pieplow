@@ -42,8 +42,13 @@ public static class RegistrationEndpoints
                 if (!participantExists)
                     return Results.BadRequest("Participant does not exist");
                 //  capacity check
-                if (instance.Registrations.Count >= instance.Capacity)
+                var currentCount = await db.Registrations
+                .CountAsync(r => r.CourseInstanceId == instanceId);
+
+                if (currentCount >= instance.Capacity)
                     return Results.BadRequest("Course is full");
+
+                
 
                 // prevent duplicate registration
                 var alreadyRegistered =
