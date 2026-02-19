@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using Contracts;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Windows;
@@ -7,7 +8,7 @@ namespace Datalagring.WPF
 {
     public partial class MainWindow : Window
     {
-        // Du måste definiera _client här för att den ska kunna användas i metoderna
+        
         private readonly HttpClient _client =
             new HttpClient { BaseAddress = new Uri("http://localhost:63606/") };
 
@@ -20,13 +21,11 @@ namespace Datalagring.WPF
         private async void btnSaveStudent_Click(object sender, RoutedEventArgs e)
         {
             // Vi skapar ett objekt som matchar din Participant-entitet i API:et
-            var newStudent = new
-            {
-                FirstName = txtFirstName.Text,
-                LastName = txtLastName.Text,
-                Email = txtEmail.Text
-            };
-
+            var newStudent = new CreateParticipantDto(
+                 txtFirstName.Text,
+                 txtLastName.Text,
+                 txtEmail.Text
+                );
             try
             {
                 var response = await _client.PostAsJsonAsync("/participants", newStudent);
@@ -57,25 +56,33 @@ namespace Datalagring.WPF
         {
             try
             {
-                // Här hämtar vi deltagare för att fylla cbParticipants
-                // Ersätt "/participants" med din faktiska GET-rutt om den heter något annat
-                var participants = await _client.GetFromJsonAsync<System.Collections.Generic.List<dynamic>>("/participants");
+                var participants = await _client
+                    .GetFromJsonAsync<List<ParticipantDto>>("/participants");
+
                 cbParticipants.ItemsSource = participants;
+
+                var instances = await _client
+                    .GetFromJsonAsync<List<CourseInstanceDto>>("/courseinstances");
+
+                cbCourseInstances.ItemsSource = instances;
             }
-            catch { /* API kanske inte är startat än */ }
+            catch
+            {
+                MessageBox.Show("Kunde inte hämta data från API.");
+            }
         }
 
         // Metod för själva kursregistreringen (M:N-kopplingen)
-      
+
         private async void btnRegister_Click(object sender, RoutedEventArgs e)
         {
-            if (cbParticipants.SelectedItem == null)
+            if (cbParticipants.SelectedItem is not ParticipantDto selectedParticipant)
             {
                 MessageBox.Show("Välj en deltagare.");
                 return;
             }
 
-            if (cbCourseInstances.SelectedItem == null)
+            if (cbCourseInstances.SelectedItem is not CourseInstanceDto selectedInstance)
             {
                 MessageBox.Show("Välj ett kurstillfälle.");
                 return;
@@ -83,16 +90,9 @@ namespace Datalagring.WPF
 
             try
             {
-                // Eftersom du använder dynamic i LoadInitialData
-                var selectedParticipant = cbParticipants.SelectedItem;
-                var selectedInstance = cbCourseInstances.SelectedItem;
-
-                Guid participantId = Guid.Parse(selectedParticipant.id.ToString());
-                Guid instanceId = Guid.Parse(selectedInstance.id.ToString());
-
                 var response = await _client.PostAsJsonAsync(
-                    $"/courseinstances/{instanceId}/registrations",
-                    participantId);   // Endast Guid skickas
+                    $"/courseinstances/{selectedInstance.Id}/registrations",
+                    selectedParticipant.Id);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -109,7 +109,7 @@ namespace Datalagring.WPF
                 MessageBox.Show($"Fel vid registrering: {ex.Message}");
             }
         }
+    }
 
     }
-}
-}
+

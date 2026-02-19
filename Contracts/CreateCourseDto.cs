@@ -1,4 +1,4 @@
-﻿namespace Datalagring_Rasmus_Pieplow.API.Contract;
+﻿namespace Contracts;
 public record CreateCourseDto(
     string Name
     );

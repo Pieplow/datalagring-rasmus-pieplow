@@ -1,6 +1,6 @@
 ﻿using Datalagring_Rasmus_Pieplow.Domain.Entities;
 using Datalagring_Rasmus_Pieplow.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore; 
 
 namespace Datalagring_Rasmus_Pieplow.Application.Services;
 
@@ -15,7 +15,7 @@ public class RegistrationService
 
     public async Task<IResult> RegisterAsync(Guid instanceId, Guid participantId)
     {
-        // Start transaction (VG-krav)
+        // Start transaction 
         using var transaction = await _db.Database.BeginTransactionAsync();
 
         try

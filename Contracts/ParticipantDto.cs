@@ -1,6 +1,7 @@
 ﻿namespace Contracts;
 
-public record CreateInstructorDto(
+public record ParticipantDto(
+    Guid Id,
     string FirstName,
     string LastName,
     string Email
