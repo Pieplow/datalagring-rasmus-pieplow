@@ -1,4 +1,5 @@
 ﻿using Datalagring_Rasmus_Pieplow.API.Endpoints;
+using Datalagring_Rasmus_Pieplow.Application.Services;
 using Datalagring_Rasmus_Pieplow.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         "Server=(localdb)\\MSSQLLocalDB;Database=DatalagringDb;Trusted_Connection=True;");
 });
 
+builder.Services.AddScoped<RegistrationService>();
+
 var app = builder.Build();
 
 app.MapGet("/", () => "API is running");
@@ -18,6 +21,8 @@ app.MapParticipantEndpoints();
 app.MapInstructorEndpoints();
 app.MapCourseEndpoints();
 app.MapRegistrationEndpoints();
+
+
 
 app.Run();
 

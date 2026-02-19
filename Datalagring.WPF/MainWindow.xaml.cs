@@ -8,7 +8,8 @@ namespace Datalagring.WPF
     public partial class MainWindow : Window
     {
         // Du måste definiera _client här för att den ska kunna användas i metoderna
-        private readonly HttpClient _client = new HttpClient { BaseAddress = new Uri("https://localhost:7001/") };
+        private readonly HttpClient _client =
+            new HttpClient { BaseAddress = new Uri("http://localhost:63606/") };
 
         public MainWindow()
         {
@@ -65,9 +66,50 @@ namespace Datalagring.WPF
         }
 
         // Metod för själva kursregistreringen (M:N-kopplingen)
-        private void btnRegister_Click(object sender, RoutedEventArgs e)
+      
+        private async void btnRegister_Click(object sender, RoutedEventArgs e)
         {
-            // Här lägger vi logiken för att anropa din Registration-endpoint
+            if (cbParticipants.SelectedItem == null)
+            {
+                MessageBox.Show("Välj en deltagare.");
+                return;
+            }
+
+            if (cbCourseInstances.SelectedItem == null)
+            {
+                MessageBox.Show("Välj ett kurstillfälle.");
+                return;
+            }
+
+            try
+            {
+                // Eftersom du använder dynamic i LoadInitialData
+                var selectedParticipant = cbParticipants.SelectedItem;
+                var selectedInstance = cbCourseInstances.SelectedItem;
+
+                Guid participantId = Guid.Parse(selectedParticipant.id.ToString());
+                Guid instanceId = Guid.Parse(selectedInstance.id.ToString());
+
+                var response = await _client.PostAsJsonAsync(
+                    $"/courseinstances/{instanceId}/registrations",
+                    participantId);   // Endast Guid skickas
+
+                if (response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Registrering lyckades!");
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Registrering misslyckades:\n{error}");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fel vid registrering: {ex.Message}");
+            }
         }
+
     }
+}
 }

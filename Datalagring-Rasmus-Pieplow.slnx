@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="Contracts/Contracts.csproj" Id="fe52fdf5-c5dc-4b1e-8305-1fba60a36dff" />
   <Project Path="Datalagring-Rasmus-Pieplow/Datalagring-Rasmus-Pieplow.csproj" />
   <Project Path="Datalagring.WPF/Datalagring.WPF.csproj" Id="3386f8d7-0b03-40c3-86a5-29e9a85b8973" />
 </Solution>
