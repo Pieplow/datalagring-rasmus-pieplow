@@ -1,7 +1,7 @@
 ﻿using Datalagring_Rasmus_Pieplow.Domain.Entities;
 using Datalagring_Rasmus_Pieplow.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Datalagring_Rasmus_Pieplow.API.Contract;
+using Contracts;
 
 
 

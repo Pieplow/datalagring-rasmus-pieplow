@@ -82,7 +82,8 @@ namespace Datalagring.WPF
         {
             var dto = new CreateInstructorDto(
                 txtInstructorFirstName.Text,
-                txtInstructorLastName.Text
+                txtInstructorLastName.Text,
+                txtInstructorEmail.Text
             );
 
             var response = await _client.PostAsJsonAsync("/instructors", dto);
@@ -117,13 +118,27 @@ namespace Datalagring.WPF
                 return;
             }
 
+            if (dpStartDate.SelectedDate is null ||
+             dpEndDate.SelectedDate is null)
+            {
+                MessageBox.Show("Välj start- och slutdatum");
+                return;
+            }
+
+            var startDate = dpStartDate.SelectedDate.Value;
+            var endDate = dpEndDate.SelectedDate.Value;
+
             var dto = new CreateCourseInstanceDto(
-                selectedCourse.Id,
-                selectedInstructor.Id,
-                capacity
+                startDate,
+                endDate,
+                capacity,
+                selectedInstructor.Id
             );
 
-            var response = await _client.PostAsJsonAsync("/courseinstances", dto);
+            var response = await _client.PostAsJsonAsync(
+                        $"/courses/{selectedCourse.Id}/instances",
+                        dto
+                           );
 
             if (response.IsSuccessStatusCode)
             {

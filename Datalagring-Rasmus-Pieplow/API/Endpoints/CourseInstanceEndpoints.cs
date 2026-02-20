@@ -1,4 +1,4 @@
-﻿using Datalagring_Rasmus_Pieplow.API.Contract;
+﻿using Contracts;
 using Datalagring_Rasmus_Pieplow.Domain.Entities;
 using Datalagring_Rasmus_Pieplow.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +9,27 @@ public static class CourseInstanceEndpoints
 {
     public static void MapCourseInstanceEndpoints(this WebApplication app)
     {
+        app.MapGet("/courseinstances",
+   async (AppDbContext db) =>
+   {
+       var instances = await db.CourseInstances
+           .AsNoTracking()
+           .Include(ci => ci.Course)
+           .Include(ci => ci.Instructor)
+           .Select(ci => new CourseInstanceDto(
+               ci.Id,
+               ci.CourseId,
+               ci.Course.Name,
+               ci.InstructorId,
+               ci.Instructor.FirstName + " " + ci.Instructor.LastName,
+               ci.StartDate,
+               ci.EndDate,
+               ci.Capacity
+           ))
+           .ToListAsync();
+
+       return Results.Ok(instances);
+   });
         // GET (nested): alla kurstillfällen för en kurs
         app.MapGet("/courses/{courseId:guid}/instances",
             async (Guid courseId, AppDbContext db) =>

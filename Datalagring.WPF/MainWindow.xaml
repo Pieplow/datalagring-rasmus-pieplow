@@ -31,6 +31,8 @@
                     <TextBox x:Name="txtInstructorFirstName" Margin="0,0,0,5"/>
                     <Label Content="Efternamn:"/>
                     <TextBox x:Name="txtInstructorLastName" Margin="0,0,0,10"/>
+                    <Label Content="Email:"/>
+                    <TextBox x:Name="txtInstructorEmail" Margin="0,0,0,10"/>
                     <Button Content="Skapa Lärare"
                             Click="btnCreateInstructor_Click"
                             Height="30"/>
@@ -49,7 +51,12 @@
                     <ComboBox x:Name="cbInstructors"
                               DisplayMemberPath="LastName"
                               Margin="0,0,0,5"/>
+                    <Label Content="Startdatum:"/>
+                    <DatePicker x:Name="dpStartDate" Margin="0,0,0,5"/>
 
+                    <Label Content="Slutdatum:"/>
+                    <DatePicker x:Name="dpEndDate" Margin="0,0,0,5"/>
+                    
                     <Label Content="Kapacitet:"/>
                     <TextBox x:Name="txtCapacity" Margin="0,0,0,10"/>
 
