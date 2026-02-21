@@ -199,5 +199,33 @@ namespace Datalagring.WPF
 
                 dgRegistrations.ItemsSource = regs;
             }
+
+        private async void btnDeleteRegistration_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not System.Windows.Controls.Button btn)
+                return;
+
+            if (btn.Tag is not Guid registrationId)
+                return;
+
+            var response = await _client.DeleteAsync($"/registrations/{registrationId}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                MessageBox.Show(await response.Content.ReadAsStringAsync());
+                return;
+            }
+
+            // Ladda om registreringar
+            if (cbCourseInstances.SelectedItem is CourseInstanceDto selectedInstance)
+            {
+                var regs = await _client.GetFromJsonAsync<List<RegistrationDto>>(
+                    $"/courseinstances/{selectedInstance.Id}/registrations");
+
+                dgRegistrations.ItemsSource = regs;
+            }
+        }
     }
+
+
 }

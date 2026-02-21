@@ -14,15 +14,18 @@ public static class RegistrationEndpoints
         app.MapGet("/courseinstances/{instanceId:guid}/registrations",
      async (Guid instanceId, AppDbContext db) =>
      {
-           var sql = @"
+         var sql = @"
             SELECT
                 r.Id,
                 r.CourseInstanceId,
                 r.ParticipantId,
                 (p.FirstName + ' ' + p.LastName) AS ParticipantName,
-                p.Email AS ParticipantEmail
+                p.Email AS ParticipantEmail,
+                c.Name AS CourseName
             FROM Registrations r
             INNER JOIN Participants p ON p.Id = r.ParticipantId
+            INNER JOIN CourseInstances ci ON ci.Id = r.CourseInstanceId
+            INNER JOIN Courses c ON c.Id = ci.CourseId
             WHERE r.CourseInstanceId = @instanceId
             ";
 

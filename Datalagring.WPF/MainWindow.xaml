@@ -106,15 +106,32 @@
                        Margin="0,20,0,5"/>
 
             <DataGrid x:Name="dgRegistrations"
-            IsReadOnly="True"
-                 AutoGenerateColumns="False">
+          AutoGenerateColumns="False"
+          IsReadOnly="True"
+          Height="150">
 
                 <DataGrid.Columns>
+
                     <DataGridTextColumn Header="Deltagare"
                             Binding="{Binding ParticipantName}" />
 
                     <DataGridTextColumn Header="Email"
                             Binding="{Binding ParticipantEmail}" />
+
+                    <DataGridTextColumn Header="Kurs"
+                            Binding="{Binding CourseName}" />
+
+                    <DataGridTemplateColumn Header="Ta bort">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="🗑"
+                            Padding="6,2"
+                            Click="btnDeleteRegistration_Click"
+                            Tag="{Binding Id}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
                 </DataGrid.Columns>
 
             </DataGrid>
