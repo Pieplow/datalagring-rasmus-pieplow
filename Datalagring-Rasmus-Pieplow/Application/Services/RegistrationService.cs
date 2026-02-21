@@ -16,7 +16,7 @@ public class RegistrationService
     public async Task<IResult> RegisterAsync(Guid instanceId, Guid participantId)
     {
         // Start transaction 
-        using var transaction = await _db.Database.BeginTransactionAsync();
+        await using var transaction = await _db.Database.BeginTransactionAsync();
 
         try
         {
@@ -75,14 +75,28 @@ public class RegistrationService
 
     public async Task<IResult> UnregisterAsync(Guid registrationId)
     {
-        var registration = await _db.Registrations.FindAsync(registrationId);
+        await using var transaction = await _db.Database.BeginTransactionAsync();
 
-        if (registration is null)
-            return Results.NotFound();
+        try
+        {
+            var registration = await _db.Registrations
+                .FirstOrDefaultAsync(r => r.Id == registrationId);
 
-        _db.Registrations.Remove(registration);
-        await _db.SaveChangesAsync();
+            if (registration is null)
+                return Results.NotFound();
 
-        return Results.NoContent();
+            _db.Registrations.Remove(registration);
+            await _db.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            return Results.NoContent();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
+
 }
