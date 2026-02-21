@@ -66,7 +66,7 @@ public static class CourseInstanceEndpoints
                 var instructorExists = await db.Instructors.AnyAsync(i => i.Id == dto.InstructorId);
                 if (!instructorExists) return Results.BadRequest("Instructor not found");
 
-                // enkel validering
+                //validering
                 if (dto.EndDate <= dto.StartDate) return Results.BadRequest("EndDate must be after StartDate");
                 if (dto.Capacity <= 0) return Results.BadRequest("Capacity must be > 0");
 

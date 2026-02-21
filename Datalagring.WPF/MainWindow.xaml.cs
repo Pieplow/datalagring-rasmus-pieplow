@@ -163,13 +163,26 @@ namespace Datalagring.WPF
                 return;
             }
 
+            var dto = new CreateRegistrationDto(selectedParticipant.Id);
+
             var response = await _client.PostAsJsonAsync(
                 $"/courseinstances/{selectedInstance.Id}/registrations",
-                selectedParticipant.Id);
+                dto);
 
             if (response.IsSuccessStatusCode)
             {
                 MessageBox.Show("Registrering lyckades!");
+
+                // 🔥 Viktigt: hämta registreringar igen
+                var regs = await _client.GetFromJsonAsync<List<RegistrationDto>>(
+                    $"/courseinstances/{selectedInstance.Id}/registrations");
+
+                dgRegistrations.ItemsSource = regs;
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                MessageBox.Show(error);
             }
         }
     }
