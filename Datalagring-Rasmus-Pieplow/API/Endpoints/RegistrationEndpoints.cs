@@ -1,6 +1,7 @@
 ﻿using Contracts;
 using Datalagring_Rasmus_Pieplow.Application.Services;
 using Datalagring_Rasmus_Pieplow.Infrastructure.Persistence;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace Datalagring_Rasmus_Pieplow.API.Endpoints;
@@ -11,23 +12,27 @@ public static class RegistrationEndpoints
     {
         // GET: alla registreringar för ett kurstillfälle (VG: returnera DTO, inte EF entity)
         app.MapGet("/courseinstances/{instanceId:guid}/registrations",
-            async (Guid instanceId, AppDbContext db) =>
-            {
-                var regs = await db.Registrations
-                    .Where(r => r.CourseInstanceId == instanceId)
-                    .Include(r => r.Participant)
-                    .AsNoTracking()
-                    .Select(r => new RegistrationDto(
-                        r.Id,
-                        r.CourseInstanceId,
-                        r.ParticipantId,
-                        r.Participant.FirstName + " " + r.Participant.LastName,
-                        r.Participant.Email
-                    ))
-                    .ToListAsync();
+     async (Guid instanceId, AppDbContext db) =>
+     {
+           var sql = @"
+            SELECT
+                r.Id,
+                r.CourseInstanceId,
+                r.ParticipantId,
+                (p.FirstName + ' ' + p.LastName) AS ParticipantName,
+                p.Email AS ParticipantEmail
+            FROM Registrations r
+            INNER JOIN Participants p ON p.Id = r.ParticipantId
+            WHERE r.CourseInstanceId = @instanceId
+            ";
 
-                return Results.Ok(regs);
-            });
+         var regs = await db.Set<RegistrationDto>()
+        .FromSqlRaw(sql, new SqlParameter("@instanceId", instanceId))
+        .AsNoTracking()
+        .ToListAsync();
+
+         return Results.Ok(regs);
+     });
 
         // POST: skapa registrering 
         app.MapPost("/courseinstances/{instanceId:guid}/registrations",

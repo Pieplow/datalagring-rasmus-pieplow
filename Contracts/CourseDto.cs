@@ -1,9 +1,3 @@
-﻿namespace Contracts
-{
-    public record CourseDto
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
+﻿namespace Contracts;
 
-    }
-}
+public record CourseDto(Guid Id, string Name);

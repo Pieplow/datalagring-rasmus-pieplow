@@ -184,6 +184,20 @@ namespace Datalagring.WPF
                 var error = await response.Content.ReadAsStringAsync();
                 MessageBox.Show(error);
             }
+
+
         }
+        private async void cbCourseInstances_SelectionChanged(
+        object sender,
+        System.Windows.Controls.SelectionChangedEventArgs e)
+            {
+                if (cbCourseInstances.SelectedItem is not CourseInstanceDto selectedInstance)
+                    return;
+
+                var regs = await _client.GetFromJsonAsync<List<RegistrationDto>>(
+                    $"/courseinstances/{selectedInstance.Id}/registrations");
+
+                dgRegistrations.ItemsSource = regs;
+            }
     }
 }

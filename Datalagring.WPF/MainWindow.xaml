@@ -91,8 +91,9 @@
 
                     <Label Content="Välj Kursinstans:"/>
                     <ComboBox x:Name="cbCourseInstances"
-                              DisplayMemberPath="CourseName"
-                              Margin="0,0,0,15"/>
+                                DisplayMemberPath="CourseName"
+                                SelectionChanged="cbCourseInstances_SelectionChanged"
+                                Margin="0,0,0,15"/>
 
                     <Button Content="Genomför Kursregistrering"
                             Click="btnRegister_Click"
@@ -105,9 +106,18 @@
                        Margin="0,20,0,5"/>
 
             <DataGrid x:Name="dgRegistrations"
-                      Height="150"
-                      AutoGenerateColumns="True"
-                      IsReadOnly="True"/>
+            IsReadOnly="True"
+                 AutoGenerateColumns="False">
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Deltagare"
+                            Binding="{Binding ParticipantName}" />
+
+                    <DataGridTextColumn Header="Email"
+                            Binding="{Binding ParticipantEmail}" />
+                </DataGrid.Columns>
+
+            </DataGrid>
 
         </StackPanel>
     </ScrollViewer>

@@ -1,4 +1,5 @@
-﻿using Datalagring_Rasmus_Pieplow.Domain.Entities;
+﻿using Contracts;
+using Datalagring_Rasmus_Pieplow.Domain.Entities;
 using Datalagring_Rasmus_Pieplow.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -22,4 +23,11 @@ public class AppDbContext : DbContext
         : base(options)
     {
     }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<RegistrationDto>().HasNoKey();
+    }
 }
+
