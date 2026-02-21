@@ -10,10 +10,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
         "Server=(localdb)\\MSSQLLocalDB;Database=DatalagringDb;Trusted_Connection=True;");
 });
-
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<RegistrationService>();
 
 var app = builder.Build();
+
+
 
 app.MapGet("/", () => "API is running");
 app.MapCourseInstanceEndpoints();
