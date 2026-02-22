@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace Datalagring.WPF
 {
@@ -76,6 +77,7 @@ namespace Datalagring.WPF
                 LoadInitialData();
             }
         }
+
 
         // ================= CREATE INSTRUCTOR =================
         private async void btnCreateInstructor_Click(object sender, RoutedEventArgs e)

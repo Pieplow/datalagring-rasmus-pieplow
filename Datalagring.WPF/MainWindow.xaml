@@ -24,6 +24,8 @@
                 </StackPanel>
             </GroupBox>
 
+       
+
             <!-- 2. SKAPA LÄRARE -->
             <GroupBox Header="2. Skapa Lärare" Margin="0,0,0,20" Padding="10">
                 <StackPanel>
@@ -48,11 +50,19 @@
                               Margin="0,0,0,5"/>
 
                     <Label Content="Välj Lärare:"/>
-                    <ComboBox x:Name="cbInstructors"
-                              DisplayMemberPath="LastName"
-                              Margin="0,0,0,5"/>
-                    <Label Content="Startdatum:"/>
-                    <DatePicker x:Name="dpStartDate" Margin="0,0,0,5"/>
+                        <ComboBox x:Name="cbInstructors" Margin="0,0,0,5">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                    <Run Text="{Binding FirstName}" />
+                                    <Run Text=" " />
+                                    <Run Text="{Binding LastName}" />
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Label Content="Startdatum:"/>
+                        <DatePicker x:Name="dpStartDate" Margin="0,0,0,5"/>
 
                     <Label Content="Slutdatum:"/>
                     <DatePicker x:Name="dpEndDate" Margin="0,0,0,5"/>
