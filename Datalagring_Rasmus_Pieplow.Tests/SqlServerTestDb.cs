@@ -10,6 +10,7 @@ public sealed class SqlServerTestDb : IAsyncDisposable
     private readonly string _dbName = $"DatalagringDb_Test_{Guid.NewGuid():N}";
     private readonly string _cs;
 
+    public string ConnectionString => _cs;
     public SqlServerTestDb()
     {
         _cs = $@"Server=(localdb)\MSSQLLocalDB;Database={_dbName};Trusted_Connection=True;MultipleActiveResultSets=True;TrustServerCertificate=True;";
