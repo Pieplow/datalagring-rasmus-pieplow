@@ -51,6 +51,9 @@ public class CourseService
 
     public async Task<IResult> CreateAsync(CreateCourseDto dto)
     {
+        if (dto is null || string.IsNullOrWhiteSpace(dto.Name))
+            return Results.BadRequest("Course name is required.");
+
         var course = new Course
         {
             Id = Guid.NewGuid(),
@@ -68,6 +71,9 @@ public class CourseService
 
     public async Task<IResult> UpdateAsync(Guid id, UpdateCourseDto dto)
     {
+        if (dto is null || string.IsNullOrWhiteSpace(dto.Name))
+            return Results.BadRequest("Course name is required.");
+
         var course = await _db.Courses.FindAsync(id);
         if (course is null) return Results.NotFound();
 

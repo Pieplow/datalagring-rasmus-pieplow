@@ -30,20 +30,20 @@ public class RegistrationService
                 .FirstOrDefaultAsync(ci => ci.Id == instanceId);
 
             if (instance is null)
-                return Results.NotFound("Course instance not found");
+                return Results.NotFound("Kurstillfälle hittades inte.");
 
             var participantExists =
                 await _db.Participants.AnyAsync(p => p.Id == participantId);
 
             if (!participantExists)
-                return Results.BadRequest("Participant does not exist");
+                return Results.BadRequest("Deltagare existerar inte.");
 
             // Capacity check
             var currentCount = await _db.Registrations
                 .CountAsync(r => r.CourseInstanceId == instanceId);
 
             if (currentCount >= instance.Capacity)
-                return Results.BadRequest("Course is full");
+                return Results.BadRequest("Kursen är full.");
 
             // Duplicate check
             var alreadyRegistered = await _db.Registrations
@@ -52,7 +52,7 @@ public class RegistrationService
                     r.ParticipantId == participantId);
 
             if (alreadyRegistered)
-                return Results.BadRequest("Participant already registered");
+                return Results.BadRequest("Deltagare redan registrerad.");
 
             var registration = new Registration
             {
@@ -69,7 +69,13 @@ public class RegistrationService
 
             return Results.Created(
                 $"/courseinstances/{instanceId}/registrations/{registration.Id}",
-                registration);
+                new
+                {
+                    registration.Id,
+                    registration.CourseInstanceId,
+                    registration.ParticipantId,
+                    registration.RegisteredAt
+                });
         }
         catch
         {

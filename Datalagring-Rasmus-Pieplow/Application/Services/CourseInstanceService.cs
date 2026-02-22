@@ -80,31 +80,46 @@ public class CourseInstanceService
 
     public async Task<IResult> CreateAsync(Guid courseId, CreateCourseInstanceDto dto)
     {
+        if (dto is null)
+            return Results.BadRequest("Begäran saknar data.");
+
         var courseExists = await _db.Courses.AnyAsync(c => c.Id == courseId);
-        if (!courseExists) return Results.NotFound("Course not found");
+        if (!courseExists)
+            return Results.NotFound("Kursen finns inte.");
 
         var instructorExists = await _db.Instructors.AnyAsync(i => i.Id == dto.InstructorId);
-        if (!instructorExists) return Results.BadRequest("Instructor not found");
+        if (!instructorExists)
+            return Results.BadRequest("Läraren finns inte.");
 
-        if (dto.EndDate <= dto.StartDate)
-            return Results.BadRequest("EndDate must be after StartDate");
+        var start = dto.StartDate.Date;
+        var end = dto.EndDate.Date;
+
+        if (end <= start)
+            return Results.BadRequest("Slutdatum måste vara efter startdatum.");
 
         if (dto.Capacity <= 0)
-            return Results.BadRequest("Capacity must be > 0");
+            return Results.BadRequest("Kapaciteten måste vara större än 0.");
+
+        var instructorOverlap = await _db.CourseInstances.AnyAsync(ci =>
+            ci.InstructorId == dto.InstructorId &&
+            start < ci.EndDate &&
+            end > ci.StartDate);
+
+        if (instructorOverlap)
+            return Results.Conflict("Läraren är redan bokad under den angivna perioden.");
 
         var instance = new CourseInstance
         {
             Id = Guid.NewGuid(),
             CourseId = courseId,
-            StartDate = dto.StartDate,
-            EndDate = dto.EndDate,
+            StartDate = start,
+            EndDate = end,
             Capacity = dto.Capacity,
             InstructorId = dto.InstructorId
         };
 
         _db.CourseInstances.Add(instance);
         await _db.SaveChangesAsync();
-
         _cache.Remove(InstancesCacheKey);
 
         return Results.Created($"/courseinstances/{instance.Id}", instance);
@@ -112,21 +127,44 @@ public class CourseInstanceService
 
     public async Task<IResult> UpdateAsync(Guid id, UpdateCourseInstanceDto dto)
     {
+        if (dto is null)
+            return Results.BadRequest("Begäran saknar data.");
+
         var instance = await _db.CourseInstances.FindAsync(id);
-        if (instance is null) return Results.NotFound();
-
-        if (dto.EndDate <= dto.StartDate)
-            return Results.BadRequest("EndDate must be after StartDate");
-
-        if (dto.Capacity <= 0)
-            return Results.BadRequest("Capacity must be > 0");
+        if (instance is null)
+            return Results.NotFound("Kurstillfället finns inte.");
 
         var instructorExists = await _db.Instructors.AnyAsync(i => i.Id == dto.InstructorId);
         if (!instructorExists)
-            return Results.BadRequest("Instructor not found");
+            return Results.BadRequest("Läraren finns inte.");
 
-        instance.StartDate = dto.StartDate;
-        instance.EndDate = dto.EndDate;
+        var start = dto.StartDate.Date;
+        var end = dto.EndDate.Date;
+
+        if (end <= start)
+            return Results.BadRequest("Slutdatum måste vara efter startdatum.");
+
+        if (dto.Capacity <= 0)
+            return Results.BadRequest("Kapaciteten måste vara större än 0.");
+
+        var registeredCount = await _db.Registrations
+            .CountAsync(r => r.CourseInstanceId == id);
+
+        if (dto.Capacity < registeredCount)
+            return Results.BadRequest(
+                $"Kapaciteten kan inte vara lägre än antalet registrerade deltagare ({registeredCount}).");
+
+        var instructorOverlap = await _db.CourseInstances.AnyAsync(ci =>
+            ci.Id != id &&
+            ci.InstructorId == dto.InstructorId &&
+            start < ci.EndDate &&
+            end > ci.StartDate);
+
+        if (instructorOverlap)
+            return Results.Conflict("Läraren är redan bokad under den angivna perioden.");
+
+        instance.StartDate = start;
+        instance.EndDate = end;
         instance.Capacity = dto.Capacity;
         instance.InstructorId = dto.InstructorId;
 

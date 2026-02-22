@@ -95,7 +95,13 @@ namespace Datalagring.WPF
                 MessageBox.Show("Lärare skapad!");
                 txtInstructorFirstName.Clear();
                 txtInstructorLastName.Clear();
+                txtInstructorEmail.Clear();   // <-- saknades
                 LoadInitialData();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                MessageBox.Show(error);
             }
         }
 

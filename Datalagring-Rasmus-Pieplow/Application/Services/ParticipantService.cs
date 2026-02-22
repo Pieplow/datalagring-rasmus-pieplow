@@ -68,13 +68,33 @@ public class ParticipantService
 
     public async Task<IResult> UpdateAsync(Guid id, UpdateParticipantDto dto)
     {
+        if (dto is null)
+            return Results.BadRequest();
+
+        if (string.IsNullOrWhiteSpace(dto.FirstName))
+            return Results.BadRequest("First name required");
+
+        if (string.IsNullOrWhiteSpace(dto.LastName))
+            return Results.BadRequest("Last name required");
+
+        if (string.IsNullOrWhiteSpace(dto.Email))
+            return Results.BadRequest("Email required");
+
         var participant = await _db.Participants.FindAsync(id);
         if (participant is null)
             return Results.NotFound();
 
+        var email = dto.Email.Trim().ToLower();
+
+        var emailExists = await _db.Participants
+            .AnyAsync(p => p.Email.ToLower() == email && p.Id != id);
+
+        if (emailExists)
+            return Results.BadRequest("Email already exists");
+
         participant.FirstName = dto.FirstName.Trim();
         participant.LastName = dto.LastName.Trim();
-        participant.Email = dto.Email.Trim();
+        participant.Email = email;
 
         await _db.SaveChangesAsync();
 

@@ -27,7 +27,15 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<RegistrationDto>().HasNoKey();
+        //Unikt index – ingen dubbelregistrering
+        modelBuilder.Entity<Registration>()
+            .HasIndex(r => new { r.CourseInstanceId, r.ParticipantId })
+            .IsUnique();
+
+        //Keyless DTO för Raw SQL
+        modelBuilder.Entity<RegistrationDto>()
+            .HasNoKey()
+            .ToView(null);
     }
 }
 

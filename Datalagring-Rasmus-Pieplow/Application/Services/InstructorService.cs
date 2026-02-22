@@ -37,16 +37,29 @@ public class InstructorService
 
     public async Task<IResult> CreateAsync(CreateInstructorDto dto)
     {
+        if (dto is null) return Results.BadRequest();
+
         if (string.IsNullOrWhiteSpace(dto.FirstName) ||
             string.IsNullOrWhiteSpace(dto.LastName))
             return Results.BadRequest("First name and last name are required.");
+
+        if (string.IsNullOrWhiteSpace(dto.Email))
+            return Results.BadRequest("Email is required.");
+
+        var email = dto.Email.Trim().ToLower();
+
+        var emailExists = await _db.Instructors
+            .AnyAsync(i => i.Email.ToLower() == email);
+
+        if (emailExists)
+            return Results.BadRequest("Email already exists.");
 
         var instructor = new Instructor
         {
             Id = Guid.NewGuid(),
             FirstName = dto.FirstName.Trim(),
             LastName = dto.LastName.Trim(),
-            Email = dto.Email?.Trim()
+            Email = dto.Email.Trim()
         };
 
         _db.Instructors.Add(instructor);
@@ -57,17 +70,30 @@ public class InstructorService
 
     public async Task<IResult> UpdateAsync(Guid id, UpdateInstructorDto dto)
     {
-        var instructor = await _db.Instructors.FindAsync(id);
-        if (instructor is null)
-            return Results.NotFound();
+        if (dto is null) return Results.BadRequest();
 
         if (string.IsNullOrWhiteSpace(dto.FirstName) ||
             string.IsNullOrWhiteSpace(dto.LastName))
             return Results.BadRequest("First name and last name are required.");
 
+        if (string.IsNullOrWhiteSpace(dto.Email))
+            return Results.BadRequest("Email is required.");
+
+        var instructor = await _db.Instructors.FindAsync(id);
+        if (instructor is null)
+            return Results.NotFound();
+
+        var email = dto.Email.Trim().ToLower();
+
+        var emailExists = await _db.Instructors
+            .AnyAsync(i => i.Id != id && i.Email.ToLower() == email);
+
+        if (emailExists)
+            return Results.BadRequest("Email already exists.");
+
         instructor.FirstName = dto.FirstName.Trim();
         instructor.LastName = dto.LastName.Trim();
-        instructor.Email = dto.Email?.Trim();
+        instructor.Email = dto.Email.Trim();
 
         await _db.SaveChangesAsync();
 

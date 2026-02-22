@@ -4,7 +4,7 @@ using Datalagring_Rasmus_Pieplow.Infrastructure.Persistence;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
-namespace Datalagring_Rasmus_Pieplow.API.Endpoints;
+namespace Datalagring_Rasmus_Pieplow.Presentation.Endpoints;
 
 public static class RegistrationEndpoints
 {

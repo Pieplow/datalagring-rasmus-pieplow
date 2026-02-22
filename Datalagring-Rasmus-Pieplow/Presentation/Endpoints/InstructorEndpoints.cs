@@ -1,7 +1,7 @@
 ﻿using Contracts;
 using Datalagring_Rasmus_Pieplow.Application.Services;
 
-namespace Datalagring_Rasmus_Pieplow.API.Endpoints;
+namespace Datalagring_Rasmus_Pieplow.Presentation.Endpoints;
 
 public static class InstructorEndpoints
 {
