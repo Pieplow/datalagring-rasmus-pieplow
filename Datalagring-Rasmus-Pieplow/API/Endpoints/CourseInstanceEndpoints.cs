@@ -2,16 +2,22 @@
 using Datalagring_Rasmus_Pieplow.Domain.Entities;
 using Datalagring_Rasmus_Pieplow.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Datalagring_Rasmus_Pieplow.API.Endpoints;
 
 public static class CourseInstanceEndpoints
+
 {
+    private const string InstancesCacheKey = "instances_all_v1";
     public static void MapCourseInstanceEndpoints(this WebApplication app)
     {
         app.MapGet("/courseinstances",
-   async (AppDbContext db) =>
+   async (AppDbContext db, IMemoryCache cache) =>
    {
+       if (cache.TryGetValue(InstancesCacheKey, out List<CourseInstanceDto>? cached) && cached is not null)
+           return Results.Ok(cached);
+
        var instances = await db.CourseInstances
            .AsNoTracking()
            .Include(ci => ci.Course)
@@ -27,6 +33,8 @@ public static class CourseInstanceEndpoints
                ci.Capacity
            ))
            .ToListAsync();
+
+       cache.Set(InstancesCacheKey, instances, TimeSpan.FromMinutes(3));
 
        return Results.Ok(instances);
    });
@@ -54,42 +62,43 @@ public static class CourseInstanceEndpoints
             });
 
         // POST: skapa kurstillfälle under en kurs
-        app.MapPost("/courses/{courseId:guid}/instances",
-            async (Guid courseId, CreateCourseInstanceDto dto, AppDbContext db) =>
-            {
-                // FK-validering:
-                // kursen måste finnas
-                var courseExists = await db.Courses.AnyAsync(c => c.Id == courseId);
-                if (!courseExists) return Results.NotFound("Course not found");
+    app.MapPost("/courses/{courseId:guid}/instances",
+        async (Guid courseId, CreateCourseInstanceDto dto, AppDbContext db, IMemoryCache cache) =>
+    {
+        var courseExists = await db.Courses.AnyAsync(c => c.Id == courseId);
+        if (!courseExists) return Results.NotFound("Course not found");
 
-                // läraren måste finnas
-                var instructorExists = await db.Instructors.AnyAsync(i => i.Id == dto.InstructorId);
-                if (!instructorExists) return Results.BadRequest("Instructor not found");
+        var instructorExists = await db.Instructors.AnyAsync(i => i.Id == dto.InstructorId);
+        if (!instructorExists) return Results.BadRequest("Instructor not found");
 
-                //validering
-                if (dto.EndDate <= dto.StartDate) return Results.BadRequest("EndDate must be after StartDate");
-                if (dto.Capacity <= 0) return Results.BadRequest("Capacity must be > 0");
+        if (dto.EndDate <= dto.StartDate)
+            return Results.BadRequest("EndDate must be after StartDate");
 
-                var instance = new CourseInstance
-                {
-                    Id = Guid.NewGuid(),
-                    CourseId = courseId,
-                    StartDate = dto.StartDate,
-                    EndDate = dto.EndDate,
-                    Capacity = dto.Capacity,
-                    InstructorId = dto.InstructorId
-                };
+        if (dto.Capacity <= 0)
+            return Results.BadRequest("Capacity must be > 0");
 
-                db.CourseInstances.Add(instance);
-                await db.SaveChangesAsync();
+        var instance = new CourseInstance
+        {
+            Id = Guid.NewGuid(),
+            CourseId = courseId,
+            StartDate = dto.StartDate,
+            EndDate = dto.EndDate,
+            Capacity = dto.Capacity,
+            InstructorId = dto.InstructorId
+        };
 
-                return Results.Created($"/courseinstances/{instance.Id}", instance);
-            });
+        db.CourseInstances.Add(instance);
+        await db.SaveChangesAsync();
+
+        cache.Remove(InstancesCacheKey);
+
+        return Results.Created($"/courseinstances/{instance.Id}", instance);
+    });
 
         // PUT: uppdatera kurstillfälle
         app.MapPut("/courseinstances/{id:guid}",
-            async (Guid id, UpdateCourseInstanceDto dto, AppDbContext db) =>
-            {
+            async (Guid id, UpdateCourseInstanceDto dto, AppDbContext db, IMemoryCache cache) =>
+    {
                 var instance = await db.CourseInstances.FindAsync(id);
                 if (instance is null) return Results.NotFound();
 
@@ -106,11 +115,13 @@ public static class CourseInstanceEndpoints
                 instance.InstructorId = dto.InstructorId;
 
                 await db.SaveChangesAsync();
+                cache.Remove(InstancesCacheKey);
                 return Results.NoContent();
             });
 
-        app.MapDelete("/instructors/{id:guid}", async (Guid id, AppDbContext db) =>
-        {
+        app.MapDelete("/instructors/{id:guid}",
+            async (Guid id, AppDbContext db, IMemoryCache cache) =>
+    {
             var instructor = await db.Instructors.FindAsync(id);
             if (instructor is null) return Results.NotFound();
 
@@ -123,8 +134,9 @@ public static class CourseInstanceEndpoints
             }
 
             db.Instructors.Remove(instructor);
-            await db.SaveChangesAsync();
 
+            await db.SaveChangesAsync();
+            cache.Remove(InstancesCacheKey);
             return Results.NoContent();
         });
     }
