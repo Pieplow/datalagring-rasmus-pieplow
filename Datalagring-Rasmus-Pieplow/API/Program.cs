@@ -11,7 +11,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         "Server=(localdb)\\MSSQLLocalDB;Database=DatalagringDb;Trusted_Connection=True;");
 });
 builder.Services.AddMemoryCache();
+builder.Services.AddScoped<CourseService>();
+builder.Services.AddScoped<CourseInstanceService>();
+builder.Services.AddScoped<InstructorService>();
+builder.Services.AddScoped<ParticipantService>();
 builder.Services.AddScoped<RegistrationService>();
+
 
 var app = builder.Build();
 

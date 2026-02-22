@@ -1,144 +1,30 @@
 ﻿using Contracts;
-using Datalagring_Rasmus_Pieplow.Domain.Entities;
-using Datalagring_Rasmus_Pieplow.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
+using Datalagring_Rasmus_Pieplow.Application.Services;
 
 namespace Datalagring_Rasmus_Pieplow.API.Endpoints;
 
 public static class CourseInstanceEndpoints
-
 {
-    private const string InstancesCacheKey = "instances_all_v1";
     public static void MapCourseInstanceEndpoints(this WebApplication app)
     {
         app.MapGet("/courseinstances",
-   async (AppDbContext db, IMemoryCache cache) =>
-   {
-       if (cache.TryGetValue(InstancesCacheKey, out List<CourseInstanceDto>? cached) && cached is not null)
-           return Results.Ok(cached);
+            (CourseInstanceService service) =>
+                service.GetAllAsync());
 
-       var instances = await db.CourseInstances
-           .AsNoTracking()
-           .Include(ci => ci.Course)
-           .Include(ci => ci.Instructor)
-           .Select(ci => new CourseInstanceDto(
-               ci.Id,
-               ci.CourseId,
-               ci.Course.Name,
-               ci.InstructorId,
-               ci.Instructor.FirstName + " " + ci.Instructor.LastName,
-               ci.StartDate,
-               ci.EndDate,
-               ci.Capacity
-           ))
-           .ToListAsync();
-
-       cache.Set(InstancesCacheKey, instances, TimeSpan.FromMinutes(3));
-
-       return Results.Ok(instances);
-   });
-        // GET (nested): alla kurstillfällen för en kurs
         app.MapGet("/courses/{courseId:guid}/instances",
-            async (Guid courseId, AppDbContext db) =>
-            {
-                return await db.CourseInstances
-                    .AsNoTracking()
-                    .Where(ci => ci.CourseId == courseId)
-                    .Include(ci => ci.Instructor) // visar relation
-                    .ToListAsync();
-            });
+            (Guid courseId, CourseInstanceService service) =>
+                service.GetByCourseIdAsync(courseId));
 
-        // GET : ett specifikt kurstillfälle
         app.MapGet("/courseinstances/{id:guid}",
-            async (Guid id, AppDbContext db) =>
-            {
-                var instance = await db.CourseInstances
-                    .AsNoTracking()
-                    .Include(ci => ci.Instructor)
-                    .FirstOrDefaultAsync(ci => ci.Id == id);
+            (Guid id, CourseInstanceService service) =>
+                service.GetByIdAsync(id));
 
-                return instance is null ? Results.NotFound() : Results.Ok(instance);
-            });
+        app.MapPost("/courses/{courseId:guid}/instances",
+            (Guid courseId, CreateCourseInstanceDto dto, CourseInstanceService service) =>
+                service.CreateAsync(courseId, dto));
 
-        // POST: skapa kurstillfälle under en kurs
-    app.MapPost("/courses/{courseId:guid}/instances",
-        async (Guid courseId, CreateCourseInstanceDto dto, AppDbContext db, IMemoryCache cache) =>
-    {
-        var courseExists = await db.Courses.AnyAsync(c => c.Id == courseId);
-        if (!courseExists) return Results.NotFound("Course not found");
-
-        var instructorExists = await db.Instructors.AnyAsync(i => i.Id == dto.InstructorId);
-        if (!instructorExists) return Results.BadRequest("Instructor not found");
-
-        if (dto.EndDate <= dto.StartDate)
-            return Results.BadRequest("EndDate must be after StartDate");
-
-        if (dto.Capacity <= 0)
-            return Results.BadRequest("Capacity must be > 0");
-
-        var instance = new CourseInstance
-        {
-            Id = Guid.NewGuid(),
-            CourseId = courseId,
-            StartDate = dto.StartDate,
-            EndDate = dto.EndDate,
-            Capacity = dto.Capacity,
-            InstructorId = dto.InstructorId
-        };
-
-        db.CourseInstances.Add(instance);
-        await db.SaveChangesAsync();
-
-        cache.Remove(InstancesCacheKey);
-
-        return Results.Created($"/courseinstances/{instance.Id}", instance);
-    });
-
-        // PUT: uppdatera kurstillfälle
         app.MapPut("/courseinstances/{id:guid}",
-            async (Guid id, UpdateCourseInstanceDto dto, AppDbContext db, IMemoryCache cache) =>
-    {
-                var instance = await db.CourseInstances.FindAsync(id);
-                if (instance is null) return Results.NotFound();
-
-                if (dto.EndDate <= dto.StartDate) return Results.BadRequest("EndDate must be after StartDate");
-                if (dto.Capacity <= 0) return Results.BadRequest("Capacity must be > 0");
-
-                // om man tillåter byte av instructor: kontrollera FK
-                var instructorExists = await db.Instructors.AnyAsync(i => i.Id == dto.InstructorId);
-                if (!instructorExists) return Results.BadRequest("Instructor not found");
-
-                instance.StartDate = dto.StartDate;
-                instance.EndDate = dto.EndDate;
-                instance.Capacity = dto.Capacity;
-                instance.InstructorId = dto.InstructorId;
-
-                await db.SaveChangesAsync();
-                cache.Remove(InstancesCacheKey);
-                return Results.NoContent();
-            });
-
-        app.MapDelete("/instructors/{id:guid}",
-            async (Guid id, AppDbContext db, IMemoryCache cache) =>
-    {
-            var instructor = await db.Instructors.FindAsync(id);
-            if (instructor is null) return Results.NotFound();
-
-            // Kolla om instruktören har några kurstillfällen för att undvika potentiel krasch
-            var isAssigned = await db.CourseInstances.AnyAsync(ci => ci.InstructorId == id);
-
-            if (isAssigned)
-            {
-                return Results.Conflict("Kan inte ta bort instruktören eftersom hen är kopplad till ett eller flera kurstillfällen.");
-            }
-
-            db.Instructors.Remove(instructor);
-
-            await db.SaveChangesAsync();
-            cache.Remove(InstancesCacheKey);
-            return Results.NoContent();
-        });
+            (Guid id, UpdateCourseInstanceDto dto, CourseInstanceService service) =>
+                service.UpdateAsync(id, dto));
     }
 }
-

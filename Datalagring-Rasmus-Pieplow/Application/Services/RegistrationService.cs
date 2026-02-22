@@ -1,6 +1,11 @@
-﻿using Datalagring_Rasmus_Pieplow.Domain.Entities;
+﻿using Contracts;
+using Microsoft.Data.SqlClient;
+using Microsoft.AspNetCore.Http;
+using Datalagring_Rasmus_Pieplow.Domain.Entities;
 using Datalagring_Rasmus_Pieplow.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore; 
+using Microsoft.EntityFrameworkCore;
+
+
 
 namespace Datalagring_Rasmus_Pieplow.Application.Services;
 
@@ -97,6 +102,31 @@ public class RegistrationService
             await transaction.RollbackAsync();
             throw;
         }
+    }
+
+    public async Task<IResult> GetByInstanceIdRawAsync(Guid instanceId)
+    {
+        var sql = @"
+        SELECT
+            r.Id,
+            r.CourseInstanceId,
+            r.ParticipantId,
+            (p.FirstName + ' ' + p.LastName) AS ParticipantName,
+            p.Email AS ParticipantEmail,
+            c.Name AS CourseName
+        FROM Registrations r
+        INNER JOIN Participants p ON p.Id = r.ParticipantId
+        INNER JOIN CourseInstances ci ON ci.Id = r.CourseInstanceId
+        INNER JOIN Courses c ON c.Id = ci.CourseId
+        WHERE r.CourseInstanceId = @instanceId
+    ";
+
+        var regs = await _db.Set<RegistrationDto>()
+            .FromSqlRaw(sql, new SqlParameter("@instanceId", instanceId))
+            .AsNoTracking()
+            .ToListAsync();
+
+        return Results.Ok(regs);
     }
 
 }
