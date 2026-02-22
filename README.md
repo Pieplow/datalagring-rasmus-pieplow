@@ -54,8 +54,7 @@ SQL Server LocalDB
 
 2. Skapa databasen:
 
-Öppna Package Manager Console och kör:
-
+Sätt Infrastructure-projektet som Default Project i Package Manager Console och kör:
 Update-Database
 
 Detta skapar databasen via migrations.
