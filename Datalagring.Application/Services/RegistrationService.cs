@@ -42,6 +42,11 @@ public class RegistrationService
     }
 
 
+    //Skriv klart det här och ta bort det nedanför.
+
+
+
+
 
 
 
