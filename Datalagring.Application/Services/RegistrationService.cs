@@ -1,9 +1,6 @@
-﻿using Contracts;
-using Microsoft.Data.SqlClient;
-using Microsoft.AspNetCore.Http;
-using Datalagring_Rasmus_Pieplow.Domain.Entities;
-using Datalagring_Rasmus_Pieplow.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
+﻿using Datalagring.Application.Abstractions;
+using Datalagring.Application.Dto;
+using Datalagring.Domain.Entities;
 
 
 
@@ -11,7 +8,52 @@ namespace Datalagring.Application.Services;
 
 public class RegistrationService
 {
-    private readonly AppDbContext _db;
+    private readonly IRegistrationRepository _repo;
+
+    public RegistrationService(IRegistrationRepository repo)
+    {
+        _repo = repo;
+    }
+
+    public async Task RegistrationService(IRegistrationRepository repo)
+    {
+        var instance = await _repo.GetByIdAsync(instanceId);
+        if (instance == null) throw new Exception("Kurstillfälle hittades inte.");
+
+        if (await _repoExistsAsync(GetByInstanceIdRawAsync, participantId))
+            throw new Exception("Deltagare är redan registrerad.");
+
+        var registration = new Registration
+        {
+            Id = Guid.NewGuid(),
+            CourseInstanceId = instanceId,
+            ParticipantId = particpantId,
+            RegiseredAt = DateTime.UtcNow
+        };
+
+        await _repo.AddAsync(registration);
+        await _repo.SaveChangesAsync();
+    }
+
+
+    public async Task<IEnumerable<RegistrationDto>> GetByInstanceIdRawAsync(Guid instanceId)
+    {
+        return await _repo.GetDetailedListAsync(instanceId);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public RegistrationService(AppDbContext db)
     {

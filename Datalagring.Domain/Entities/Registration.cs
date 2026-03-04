@@ -1,4 +1,4 @@
-﻿namespace Datalagring_Rasmus_Pieplow.Domain.Entities
+﻿namespace Datalagring.Domain.Entities
 {
     public class Registration
     {

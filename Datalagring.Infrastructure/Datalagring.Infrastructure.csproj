@@ -10,4 +10,8 @@
     <Folder Include="Repositories\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Datalagring.Application\Datalagring.Application.csproj" />
+  </ItemGroup>
+
 </Project>
