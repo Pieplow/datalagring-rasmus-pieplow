@@ -73,4 +73,16 @@ public class RegistrationRepository : IRegistrationRepository
             .AsNoTracking()
             .ToListAsync();
     }
+
+    public async Task RemoveAsync(Guid id)
+    {
+        // Vi letar upp den specifika registreringen i databasen
+        var registration = await _context.Registrations.FindAsync(id);
+
+        // Om den finns (inte är null), så tar vi bort den
+        if (registration != null)
+        {
+            _context.Registrations.Remove(registration);
+        }
+    }
 }
