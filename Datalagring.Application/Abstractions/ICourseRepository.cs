@@ -1,10 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Datalagring.application.Dto;
+using Datalagring.Application.Dto;
+using Datalagring.Domain.Entities;
 
 namespace Datalagring.Application.Abstractions;
 
-internal interface ICourseRepository
+public interface ICourseRepository
 {
-    
+    Task<CourseDto?> GetByIdAsync(Guid id);
+    Task<IEnumerable<CourseDto>> GetAllAsync();
+    Task AddAsync(Course course);
+    void Update(Course course);
+    Task RemoveAsync(Guid id);
+    Task SaveChangesAsync();
 }

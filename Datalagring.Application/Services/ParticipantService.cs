@@ -1,115 +1,71 @@
-﻿using Contracts;
-using Datalagring_Rasmus_Pieplow.Domain.Entities;
-using Datalagring_Rasmus_Pieplow.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http;
+﻿using Datalagring.application.Dto;
+using Datalagring.Application.Abstractions;
+using Datalagring.Application.Dto;
+using Datalagring.Domain.Entities;
 
 namespace Datalagring.Application.Services;
 
 public class ParticipantService
 {
-    private readonly AppDbContext _db;
+    private readonly IParticipantRepository _repo;
 
-    public ParticipantService(AppDbContext db)
+    // Pratar bara med Interfacet nu - ingen databas här!
+    public ParticipantService(IParticipantRepository repo)
     {
-        _db = db;
+        _repo = repo;
     }
 
-    public async Task<IResult> GetAllAsync()
+    public async Task<IEnumerable<ParticipantDto>> GetAllAsync()
     {
-        var participants = await _db.Participants
-            .AsNoTracking()
-            .ToListAsync();
-
-        return Results.Ok(participants);
+        return await _repo.GetAllAsync();
     }
 
-    public async Task<IResult> GetByIdAsync(Guid id)
+    public async Task<ParticipantDto?> GetByIdAsync(Guid id)
     {
-        var participant = await _db.Participants
-            .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.Id == id);
-
-        return participant is null
-            ? Results.NotFound()
-            : Results.Ok(participant);
+        return await _repo.GetByIdAsync(id);
     }
 
-    public async Task<IResult> CreateAsync(CreateParticipantDto dto)
+    public async Task CreateAsync(CreateParticipantDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.FirstName))
-            return Results.BadRequest("First name required");
-
-        if (string.IsNullOrWhiteSpace(dto.LastName))
-            return Results.BadRequest("Last name required");
-
+        // Validering
         if (string.IsNullOrWhiteSpace(dto.Email))
-            return Results.BadRequest("Email required");
+            throw new Exception("E-post krävs.");
 
-        var exists = await _db.Participants
-            .AnyAsync(p => p.Email == dto.Email);
-
-        if (exists)
-            return Results.BadRequest("Email already exists");
+        // Affärsregel via Repot
+        if (await _repo.EmailExistsAsync(dto.Email))
+            throw new Exception("E-postadressen är redan upptagen.");
 
         var participant = new Participant
         {
             Id = Guid.NewGuid(),
             FirstName = dto.FirstName.Trim(),
             LastName = dto.LastName.Trim(),
-            Email = dto.Email.Trim()
+            Email = dto.Email.Trim().ToLower()
         };
 
-        _db.Participants.Add(participant);
-        await _db.SaveChangesAsync();
-
-        return Results.Created($"/participants/{participant.Id}", participant);
+        await _repo.AddAsync(participant);
+        await _repo.SaveChangesAsync();
     }
 
-    public async Task<IResult> UpdateAsync(Guid id, UpdateParticipantDto dto)
+    public async Task UpdateAsync(Guid id, UpdateParticipantDto dto)
     {
-        if (dto is null)
-            return Results.BadRequest();
+        // Här kan du hämta entiteten först för att se om den finns
+        // Men vi håller det enkelt: vi ber repot uppdatera
+        var participant = new Participant
+        {
+            Id = id,
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
+            Email = dto.Email
+        };
 
-        if (string.IsNullOrWhiteSpace(dto.FirstName))
-            return Results.BadRequest("First name required");
-
-        if (string.IsNullOrWhiteSpace(dto.LastName))
-            return Results.BadRequest("Last name required");
-
-        if (string.IsNullOrWhiteSpace(dto.Email))
-            return Results.BadRequest("Email required");
-
-        var participant = await _db.Participants.FindAsync(id);
-        if (participant is null)
-            return Results.NotFound();
-
-        var email = dto.Email.Trim().ToLower();
-
-        var emailExists = await _db.Participants
-            .AnyAsync(p => p.Email.ToLower() == email && p.Id != id);
-
-        if (emailExists)
-            return Results.BadRequest("Email already exists");
-
-        participant.FirstName = dto.FirstName.Trim();
-        participant.LastName = dto.LastName.Trim();
-        participant.Email = email;
-
-        await _db.SaveChangesAsync();
-
-        return Results.NoContent();
+        _repo.Update(participant);
+        await _repo.SaveChangesAsync();
     }
 
-    public async Task<IResult> DeleteAsync(Guid id)
+    public async Task DeleteAsync(Guid id)
     {
-        var participant = await _db.Participants.FindAsync(id);
-        if (participant is null)
-            return Results.NotFound();
-
-        _db.Participants.Remove(participant);
-        await _db.SaveChangesAsync();
-
-        return Results.NoContent();
+        await _repo.RemoveAsync(id);
+        await _repo.SaveChangesAsync();
     }
 }

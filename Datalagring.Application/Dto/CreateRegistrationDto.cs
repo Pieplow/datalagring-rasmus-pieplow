@@ -2,6 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Datalagring.application.Dto;
+namespace Datalagring.Application.Dto;
 
 public record CreateRegistrationDto(Guid ParticipantId);

@@ -5,7 +5,7 @@ using Datalagring_Rasmus_Pieplow.Infrastructure.Persistence;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
-namespace Datalagring.Infrastructure.Persistence;
+namespace Datalagring.Infrastructure.Repositories;
 
 public class RegistrationRepository : IRegistrationRepository
 {

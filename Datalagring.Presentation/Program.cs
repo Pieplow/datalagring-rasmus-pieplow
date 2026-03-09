@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<CourseService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(
@@ -16,6 +18,8 @@ builder.Services.AddScoped<CourseInstanceService>();
 builder.Services.AddScoped<InstructorService>();
 builder.Services.AddScoped<ParticipantService>();
 builder.Services.AddScoped<RegistrationService>();
+
+
 
 
 var app = builder.Build();
