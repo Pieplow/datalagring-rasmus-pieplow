@@ -1,3 +1,3 @@
-﻿namespace Datalagring.application.Dto;
+﻿namespace Datalagring.Application.Dto; 
 
-public record CourseDto(Guid Id, string Name);
+public record CourseDto(Guid Id, string Name, string Description);

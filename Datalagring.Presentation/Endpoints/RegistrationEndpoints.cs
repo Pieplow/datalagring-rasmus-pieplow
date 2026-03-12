@@ -1,10 +1,9 @@
-﻿using Contracts;
-using Datalagring_Rasmus_Pieplow.Application.Services;
-using Datalagring_Rasmus_Pieplow.Infrastructure.Persistence;
+﻿using Datalagring.Application.Services;
+using Datalagring.Infrastructure.Persistence;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
-namespace Datalagring_Rasmus_Pieplow.Presentation.Endpoints;
+namespace Datalagring.Presentation.Endpoints;
 
 public static class RegistrationEndpoints
 {

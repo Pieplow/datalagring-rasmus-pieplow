@@ -1,7 +1,6 @@
-﻿using Contracts;
-using Datalagring_Rasmus_Pieplow.Application.Services;
+﻿using Datalagring.Application.Services;
 
-namespace Datalagring_Rasmus_Pieplow.Presentation.Endpoints;
+namespace Datalagring.Presentation.Endpoints;
 
 public static class ParticipantEndpoints
 {

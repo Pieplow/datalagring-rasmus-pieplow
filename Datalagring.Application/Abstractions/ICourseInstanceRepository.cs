@@ -1,12 +1,11 @@
-﻿using Datalagring.Domain.Entities;
+﻿using Datalagring.Application.Dto;
 
 namespace Datalagring.Application.Abstractions;
 
 public interface ICourseInstanceRepository
 {
-    Task<IEnumerable<CourseInstance>> GetAllAsync();
-    Task<CourseInstance?> GetByIdAsync(Guid id);
-    Task<bool> HasInstructorOverlapAsync(Guid instructorId, DateTime start, DateTime end, Guid? excludeId = null);
-    Task AddAsync(CourseInstance instance);
+    Task<CourseInstanceDto?> GetByIdAsync(Guid id);
+    Task<IEnumerable<CourseInstanceDto>> GetAllAsync();
+    Task AddAsync(Datalagring.Domain.Entities.CourseInstance instance);
     Task SaveChangesAsync();
 }

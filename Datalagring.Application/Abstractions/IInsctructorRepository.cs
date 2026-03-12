@@ -1,10 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Datalagring.Domain.Entities;
+using Datalagring.Application.Dto;
 
 namespace Datalagring.Application.Abstractions
 {
-    internal interface IInsctructorRepository
+    public interface IInsctructorRepository
     {
+        Task<InstructorDto?> GetByIdAsync(Guid id);
+        Task<IEnumerable<InstructorDto>> GetAllAsync();
+        Task AddAsync(Instructor instructor);
+        Task SaveChangesAsync();
     }
 }

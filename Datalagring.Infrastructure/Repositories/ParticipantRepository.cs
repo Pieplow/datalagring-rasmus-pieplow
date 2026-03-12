@@ -1,7 +1,7 @@
 ﻿using Datalagring.Application.Abstractions;
 using Datalagring.Application.Dto;
 using Datalagring.Domain.Entities;
-using Datalagring_Rasmus_Pieplow.Infrastructure.Persistence; // Se till att AppDbContext finns här
+using Datalagring.Infrastructure.Persistence;
 
 namespace Datalagring.Infrastructure.Repositories
 {

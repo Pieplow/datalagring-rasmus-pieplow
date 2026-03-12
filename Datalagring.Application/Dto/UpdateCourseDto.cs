@@ -1,4 +1,4 @@
-﻿namespace Datalagring.application.Dto;
+﻿namespace Datalagring.Application.Dto;
 
 public record UpdateCourseDto(
     string Name

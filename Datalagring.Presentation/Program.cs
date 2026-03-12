@@ -1,6 +1,6 @@
-﻿using Datalagring_Rasmus_Pieplow.Presentation.Endpoints;
-using Datalagring_Rasmus_Pieplow.Application.Services;
-using Datalagring_Rasmus_Pieplow.Infrastructure.Persistence;
+﻿using Datalagring.Presentation.Endpoints;
+using Datalagring.Application.Services;
+using Datalagring.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

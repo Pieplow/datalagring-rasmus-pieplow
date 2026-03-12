@@ -1,7 +1,7 @@
 ﻿using Datalagring.Application.Abstractions;
 using Datalagring.Application.Dto;
 using Datalagring.Domain.Entities;
-using Datalagring_Rasmus_Pieplow.Infrastructure.Persistence;
+using Datalagring.Infrastructure.Persistence;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 

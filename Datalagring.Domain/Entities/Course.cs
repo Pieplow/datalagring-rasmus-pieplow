@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Datalagring.Domain.Entities
+﻿namespace Datalagring.Domain.Entities
 {
     public class Course
     {
@@ -11,5 +7,6 @@ namespace Datalagring.Domain.Entities
 
         public ICollection<CourseInstance> CourseInstances { get; set; } = [];
 
+        public string Description { get; set; } = string.Empty;
     }
 }

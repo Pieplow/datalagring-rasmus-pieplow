@@ -1,5 +1,4 @@
-﻿using Datalagring.application.Dto;
-using Datalagring.Application.Abstractions;
+﻿using Datalagring.Application.Abstractions;
 using Datalagring.Application.Dto;
 using Datalagring.Domain.Entities;
 

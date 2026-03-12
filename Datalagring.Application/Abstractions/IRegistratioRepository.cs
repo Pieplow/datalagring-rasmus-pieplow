@@ -1,5 +1,4 @@
-﻿
-using Datalagring.Application.Dto;
+﻿using Datalagring.Application.Dto;
 using Datalagring.Domain.Entities;
 
 namespace Datalagring.Application.Abstractions;

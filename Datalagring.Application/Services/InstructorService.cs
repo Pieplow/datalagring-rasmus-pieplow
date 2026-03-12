@@ -1,122 +1,49 @@
-﻿using Contracts;
-using Datalagring.Domain.Entities;
-using Datalagring.Application.Abstractions;
+﻿using Datalagring.Application.Abstractions;
 using Datalagring.Application.Dto;
-using Datalagring.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http;
+using Datalagring.Domain.Entities;
 
 namespace Datalagring.Application.Services;
 
 public class InstructorService
 {
-    private readonly AppDbContext _db;
+    private readonly IInstructorRepository _repo;
 
-    public InstructorService(AppDbContext db)
+    public InstructorService(IInstructorRepository repo)
     {
-        _db = db;
+        _repo = repo;
     }
 
-    public async Task<IResult> GetAllAsync()
+    public async Task<IEnumerable<InstructorDto>> GetAllAsync()
     {
-        var instructors = await _db.Instructors
-            .AsNoTracking()
-            .ToListAsync();
-
-        return Results.Ok(instructors);
+        return await _repo.GetAllAsync();
     }
 
-    public async Task<IResult> GetByIdAsync(Guid id)
+    public async Task<InstructorDto?> GetByIdAsync(Guid id)
     {
-        var instructor = await _db.Instructors
-            .AsNoTracking()
-            .FirstOrDefaultAsync(i => i.Id == id);
-
-        return instructor is null
-            ? Results.NotFound()
-            : Results.Ok(instructor);
+        return await _repo.GetByIdAsync(id);
     }
 
-    public async Task<IResult> CreateAsync(CreateInstructorDto dto)
+    public async Task CreateAsync(InstructorDto dto)
     {
-        if (dto is null) return Results.BadRequest();
-
-        if (string.IsNullOrWhiteSpace(dto.FirstName) ||
-            string.IsNullOrWhiteSpace(dto.LastName))
-            return Results.BadRequest("First name and last name are required.");
-
         if (string.IsNullOrWhiteSpace(dto.Email))
-            return Results.BadRequest("Email is required.");
-
-        var email = dto.Email.Trim().ToLower();
-
-        var emailExists = await _db.Instructors
-            .AnyAsync(i => i.Email.ToLower() == email);
-
-        if (emailExists)
-            return Results.BadRequest("Email already exists.");
+            throw new Exception("E-post krävs.");
 
         var instructor = new Instructor
         {
             Id = Guid.NewGuid(),
             FirstName = dto.FirstName.Trim(),
             LastName = dto.LastName.Trim(),
-            Email = dto.Email.Trim()
+            Email = dto.Email.Trim().ToLower()
         };
 
-        _db.Instructors.Add(instructor);
-        await _db.SaveChangesAsync();
-
-        return Results.Created($"/instructors/{instructor.Id}", instructor);
+        await _repo.AddAsync(instructor);
+        await _repo.SaveChangesAsync();
     }
 
-    public async Task<IResult> UpdateAsync(Guid id, UpdateInstructorDto dto)
+    public async Task DeleteAsync(Guid id)
     {
-        if (dto is null) return Results.BadRequest();
-
-        if (string.IsNullOrWhiteSpace(dto.FirstName) ||
-            string.IsNullOrWhiteSpace(dto.LastName))
-            return Results.BadRequest("First name and last name are required.");
-
-        if (string.IsNullOrWhiteSpace(dto.Email))
-            return Results.BadRequest("Email is required.");
-
-        var instructor = await _db.Instructors.FindAsync(id);
-        if (instructor is null)
-            return Results.NotFound();
-
-        var email = dto.Email.Trim().ToLower();
-
-        var emailExists = await _db.Instructors
-            .AnyAsync(i => i.Id != id && i.Email.ToLower() == email);
-
-        if (emailExists)
-            return Results.BadRequest("Email already exists.");
-
-        instructor.FirstName = dto.FirstName.Trim();
-        instructor.LastName = dto.LastName.Trim();
-        instructor.Email = dto.Email.Trim();
-
-        await _db.SaveChangesAsync();
-
-        return Results.NoContent();
-    }
-
-    public async Task<IResult> DeleteAsync(Guid id)
-    {
-        var instructor = await _db.Instructors.FindAsync(id);
-        if (instructor is null)
-            return Results.NotFound();
-
-        var isAssigned = await _db.CourseInstances
-            .AnyAsync(ci => ci.InstructorId == id);
-
-        if (isAssigned)
-            return Results.Conflict("Instructor is assigned to one or more course instances.");
-
-        _db.Instructors.Remove(instructor);
-        await _db.SaveChangesAsync();
-
-        return Results.NoContent();
+        // Här kan vi lägga till logik om läraren får tas bort eller ej
+        await _repo.RemoveAsync(id);
+        await _repo.SaveChangesAsync();
     }
 }
